@@ -17,32 +17,34 @@ class DiffieHellman(object):
         # but you lose in efficiency
         self.n = number.getPrime(n_bits)
 
+    def get_a(self):
         # a is somewhere between 1 and n
-        self.a = random.randint(1, self.n)
+        return random.randint(1, self.n)
 
-    def get_ag(self):
-        return (self.g**self.a) % self.n
+    def get_ga(self, a):
+        return (self.g**a) % self.n
 
-    def get_secret_key(self, b):
-        return (self.get_ag()**b) % self.n
+    def get_secret_key(self, ga, b):
+        return (ga**b) % self.n
 
 if __name__ == '__main__':
     # Initialize Diffie Hellman objects
-    dh_a = DiffieHellman()
-    dh_b = DiffieHellman()
+    dh = DiffieHellman(4, 8)
+
+    # Get rand a and b
+    rand_a = dh.get_a()
+    rand_b = dh.get_a()
 
     # Get exchange keys
-    ag = dh_a.get_ag()
-    bg = dh_b.get_bg()
+    ga = dh.get_ga(rand_a)
+    gb = dh.get_ga(rand_b)
 
     # Compute secret keys, should expect the same values
-    secret_key_a = dh_a.get_secret_key(bg)
-    secret_key_b = dh_b.get_secret_key(ag)
+    secret_key_a = dh.get_secret_key(gb, rand_a)
+    secret_key_b = dh.get_secret_key(ga, rand_b)
 
-    print('Secret key from a:')
-    print(secret_key_a)
-    print('\n')
-
-    print('Secret key from b:')
-    print(secret_key_b)
+    # Print values
+    print('DIFFIE HELLMAN VALUES:')
+    print(f'  a: a={rand_a}, ga={ga}, secret_key={secret_key_a}')
+    print(f'  b: b={rand_b}, gb={gb}, secret_key={secret_key_b}')
 

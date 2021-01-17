@@ -85,3 +85,103 @@ more), it takes a while...
 
 So how can we generate big prime numbers quickly for cryptography purposes?
 
+## Probabilistic tests
+
+Probabilistic algorithms are much faster than the one above, but we can't be
+100% sure that __n__ is prime.
+
+In fact, a probabilitics test is absolutely right when it says that __n__ is
+composite. But when it says that __n__ is prime, there is a (very low) chance
+that __n__ is actually not prime.
+
+Here, we will see a famous probabilistic algorithm, called _Miller-Rabin_. But
+before, let's go through some maths that will help us understand how this
+algorithm works.
+
+### Fermat primality test
+
+Given __n__, a prime number, and __a__, an integer such that __1 <= a <= n-1__,
+the _Fermat's little theorem_ says that __a^(n-1) = 1 (mod n)__.
+
+So for an integer __n__, we just have to find a value of __a__ for which
+__a^(n-1) != 1 (mod n)__ to prove that __n__ is composite. Such value for __a__
+is called a _Fermat witness_.
+
+On the other hand, if we find a value of __a__ that verify the Fermat's theorem,
+we just show that __n__ satisfies Fermat's theorem for the base __a__, and
+appears to be prime. In this case, we say that __n__ is _pseudo-prime of base
+a_.
+
+But if in a later test, we finally find that this __n__ is composite, then, the
+previous values of __a__ for whose __a^(n-1) != 1 (mod n)__ are called _Fermat
+liars_, because they lied about the fact that __n__ is actually composite.
+
+### Carmichael numbers
+
+There are some composite numbers that satisfies the _Fermat's little theorem_
+for all possible values of __a__. As you guessed, these numbers are called...
+_Carmichael numbers_ (so much suspense...).
+
+The first 3 are __561__, __1105__, and __1729__.
+
+There are only __255__ Carmichael numbers __< 10^8__, and __20138200 < 10^21__.
+So if you generate a random number __n < 10^8__, the probability that __n__ is a
+Carmichael number is __2.55*10^(-6)__. As you can see, it's very low! But the
+Fermat primality test is not perfect, because of these numbers.A
+
+Miller-Rabin is more advanced that Fermat's primality test, and Carmichael
+numbers are not a problem.
+
+### Trivial and nontrivial square root
+
+We define __p > 2__, a prime.A
+
+We know that __1__ and __-1__ always give __1__ when squared: __1^2 = (-1)^2 = 1
+(mod p)__. They are called _trivial square root_.A
+
+But sometimes, there are _nontrivial square root_ of __1__ modulo __p__. We
+define __a__, an integer, to be a _nontrivial square root_ of __1 (mod p)__ if
+__a^2 = 1 (mod p)__.
+
+> _For example:_
+> 3^2 = 9 = 1 (mod 8)
+> so __3__ is _non trivial square root_ of __1__ modulo __8__.
+
+If __1__ has a square root other than __1__ and __-1__ modulo __n__ (a
+nontrivial square root), then __n__ must be composite.A
+
+### Miller-Rabin
+
+The goal of Miller-Rabin is to find a nontrivial square root of __1__ modulo
+__n__.
+
+Take back the _Fermat's little theorem_: __a^(n-1) = 1 (mod n)__.A
+
+For Miller-Rabin, we need to find __r__ and __s__ such that __(n-1) = r*(2^s)__,
+with __r__ odd.A
+
+Then, we pick __a__, an integer in the range __[1, n-1]__.A
+
+- If __a^r != 1 (mod n)__ and __a^((2^j)r) != -1 (mod n)__ for all __j__ such
+  that __0 <= j <= s-1__, then __n__ is not prime and __a__ is called a _strong
+  witness to compositeness for n_.
+- On the other hand, if __a^r = 1 (mod n)__ or __a^((2^j)r) = -1 (mod n)__ for
+  some __j__ such as __0 <= j <= s-1__, then __n__ is said to be a _strong
+  pseudo-prime to the base a_, and __a__ is called a _strong liar to primality
+  for n_.
+
+## So, how to generate big prime numbers?
+
+Now, we know all the theory we need to generate prime numbers. So... let's do
+it! :)
+
+### The algorithm
+
+- __Generate a prime candidate__. Say we want a 1024 bits prime number. Start by
+  generating 1024 bits randomly. Set the MSB to 1, to make sure that the number
+  hold 1024 bits. Set the LSB to 1 to make sure that it is an odd number.
+- __Test if the generated number if prime__ with Miller-Rabin. Run the test many
+  times to make it more efficient.
+- If the number is not prime, __restart__ from the beginning.
+
+
